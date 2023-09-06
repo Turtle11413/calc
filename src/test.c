@@ -37,7 +37,7 @@ START_TEST(s21_smartCalc_test_5) {
   int error = 0;
 	double res = 0;
   error = processing(str, &res, 0);
-  ck_assert_int_eq(error, ERROR);
+  ck_assert_int_eq(error, INCORRECT_INPUT);
 }
 END_TEST
 
@@ -133,8 +133,7 @@ START_TEST(s21_smartCalc_test_14) {
   char *str = "0.5/0";
   int error = 0;
   error = processing(str, &res, 0);
-
-  ck_assert_int_eq(error, ERROR);
+  ck_assert_int_eq(error, CALCULATION_ERROR);
 }
 END_TEST
 
@@ -143,7 +142,7 @@ START_TEST(s21_smartCalc_test_15) {
   int error = 0;
 	double res = 0;
   error = processing(str, &res, 0);
-  ck_assert_int_eq(error, ERROR);
+  ck_assert_int_eq(error, INCORRECT_INPUT);
 }
 END_TEST
 

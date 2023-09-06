@@ -1,13 +1,13 @@
 #include "calc.h"
 
-int processZeroPriority(char* str, Stack* stack, int i) {
+int setZeroPriority(char* str, Stack* stack, int i) {
 	int status = OK;
   switch (str[i]) {
     case '(':
-      status = push(stack, '(', L_BRACKET, 0);
+      status = push(stack, '(', LEFT_BRACKET, 0);
       break;
     case ')':
-      status = push(stack, ')', R_BRACKET, 0);
+      status = push(stack, ')', RIGHT_BRACKET, 0);
       break;
     case 'x':
       status = push(stack, 'x', X, 0);
@@ -16,7 +16,7 @@ int processZeroPriority(char* str, Stack* stack, int i) {
 	return status;
 }
 
-int processFirstPriority(char* str, Stack* stack, int i, int* minusSign, int* plusSign) {
+int setFirstPriority(char* str, Stack* stack, int i, int* minusSign, int* plusSign) {
 	int status = OK;
   if (str[i] == '+') {
     if (i == 0 || (str[i - 1] == '(')) {
@@ -36,7 +36,7 @@ int processFirstPriority(char* str, Stack* stack, int i, int* minusSign, int* pl
 	return status;
 }
 
-int processSecondPriority(char* str, Stack* stack, int* i) {
+int setSecondPriority(char* str, Stack* stack, int* i) {
 	int status = OK;
   if (str[*i] == '*') {
     status = push(stack, '*', MULT, 2);
@@ -49,7 +49,7 @@ int processSecondPriority(char* str, Stack* stack, int* i) {
 	return status;
 }
 
-int processThirdPriority(char* str, Stack* stack, int i) {
+int setThirdPriority(char* str, Stack* stack, int i) {
 	int status = OK;
   if (str[i] == '^') {
     status = push(stack, '^', EXP, 3);
@@ -57,29 +57,29 @@ int processThirdPriority(char* str, Stack* stack, int i) {
 	return status;
 }
 
-int processFourthPriority(char* str, Stack* stack, int* i) {
+int setFourthPriority(char* str, Stack* stack, int* i) {
 	int status = OK;
   if (str[*i] == 'c') {
     status = push(stack, 'c', COS, 4);
-    *i = *i + 2;
+    *i += 2;
   } else if (str[*i] == 't') {
     status = push(stack, 't', TAN, 4);
-    *i = *i + 2;
+    *i += 2;
   } else if (str[*i] == 's') {
     if (str[*i + 1] == 'i') {
       status = push(stack, 's', SIN, 4);
-      *i = *i + 2;
+      *i += 2;
     } else {
       status = push(stack, 'q', SQRT, 4);
-      *i = *i + 3;
+      *i += 3;
     }
   } else if (str[*i] == 'l') {
     if (str[*i + 1] == 'o') {
       status = push(stack, 'L', LOG, 4);
-      *i = *i + 2;
+      *i += 2;
     } else {
       status = push(stack, 'l', LN, 4);
-      *i = *i + 1;
+      *i += 1;
     }
   } else if (str[*i] == 'a') {
     if (str[*i + 1] == 's') {
@@ -89,7 +89,7 @@ int processFourthPriority(char* str, Stack* stack, int* i) {
     } else {
       status = push(stack, 'T', ATAN, 4);
     }
-    *i = *i + 3;
+    *i += 3;
   }
 	return status;
 }

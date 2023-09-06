@@ -1,6 +1,8 @@
 #include "calc.h"
 
-void initStack(Stack* stack) { stack->top = NULL; }
+void initStack(Stack* stack) {
+  stack->top = NULL;
+}
 
 int push(Stack* list, double data, int type, int priority) {
   int status = OK;

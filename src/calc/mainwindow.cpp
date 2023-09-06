@@ -3,19 +3,19 @@
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent) , ui(new Ui::MainWindow) {
-    ui->setupUi(this); ui->lineEdit->setReadOnly(true);
+    ui->setupUi(this);
 
-    connect(ui->Button_number_1, SIGNAL(clicked()), this, SLOT(numbers()));
-    connect(ui->Button_number_2, SIGNAL(clicked()), this, SLOT(numbers()));
-    connect(ui->Button_number_3, SIGNAL(clicked()), this, SLOT(numbers()));
-    connect(ui->Button_number_4, SIGNAL(clicked()), this, SLOT(numbers()));
-    connect(ui->Button_number_5, SIGNAL(clicked()), this, SLOT(numbers()));
-    connect(ui->Button_number_6, SIGNAL(clicked()), this, SLOT(numbers()));
-    connect(ui->Button_number_7, SIGNAL(clicked()), this, SLOT(numbers()));
-    connect(ui->Button_number_8, SIGNAL(clicked()), this, SLOT(numbers()));
-    connect(ui->Button_number_9, SIGNAL(clicked()), this, SLOT(numbers()));
-    connect(ui->Button_AC, SIGNAL(clicked()), this, SLOT(clear_all()));
-    connect(ui->Button_CE, SIGNAL(clicked()), this, SLOT(on_pushButton_CE()));
+//    connect(ui->Button_number_1, SIGNAL(clicked()), this, SLOT(numbers()));
+//    connect(ui->Button_number_2, SIGNAL(clicked()), this, SLOT(numbers()));
+//    connect(ui->Button_number_3, SIGNAL(clicked()), this, SLOT(numbers()));
+//    connect(ui->Button_number_4, SIGNAL(clicked()), this, SLOT(numbers()));
+//    connect(ui->Button_number_5, SIGNAL(clicked()), this, SLOT(numbers()));
+//    connect(ui->Button_number_6, SIGNAL(clicked()), this, SLOT(numbers()));
+//    connect(ui->Button_number_7, SIGNAL(clicked()), this, SLOT(numbers()));
+//    connect(ui->Button_number_8, SIGNAL(clicked()), this, SLOT(numbers()));
+//    connect(ui->Button_number_9, SIGNAL(clicked()), this, SLOT(numbers()));
+//    connect(ui->Button_AC, SIGNAL(clicked()), this, SLOT(clear_all()));
+//    connect(ui->Button_CE, SIGNAL(clicked()), this, SLOT(on_pushButton_CE()));
 
 
 }
@@ -28,21 +28,21 @@ MainWindow::~MainWindow()
 
 void MainWindow::numbers() {
   QPushButton *button = (QPushButton *)sender();
-  QString new_label = ui->lineEdit->text() + button->text();
-  ui->lineEdit->setText(new_label);
+  QString new_label = ui->label->text() + button->text();
+  ui->label->setText(new_label);
 }
 
-void MainWindow::pushButtonAC() { ui->lineEdit->setText(""); }
+void MainWindow::pushButtonAC() { ui->label->setText(""); }
 
 void MainWindow::pushButtonCE() {
-  QString text = ui->lineEdit->text();
+  QString text = ui->label->text();
   if (!text.isEmpty()) {
     text.chop(1);
-    ui->lineEdit->setText(text);
+    ui->label->setText(text);
   }
 }
 
 void MainWindow::arithmeticsOperations() {
     QPushButton *button = (QPushButton *)sender();
-    ui->lineEdit->setText(ui->lineEdit->text() + button->text());
+    ui->label->setText(ui->label->text() + button->text());
 }

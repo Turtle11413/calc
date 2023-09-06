@@ -2,55 +2,51 @@
 
 int processing(char* str, double* result, double x) {
   int status = OK;
+  *result = 0;
   Stack infix;
   initStack(&infix);
-
-  Stack reversed;
-  initStack(&reversed);
 
   Stack buffer;
   initStack(&buffer);
 
-  if (validateStr(str) == OK && 0 < strlen(str) && strlen(str) <= 255) {
-    if (inputStrToStack(str, &infix)) {
-      reverseForRpn(&infix, &reversed);
-      infixToPostfix(&reversed, &buffer, &infix);
-      reverseForRpn(&infix, &reversed);
-      *result = calculateResult(&reversed, x);
-    } else {
-      status = ERROR;
-      *result = 0;
+  Stack reversed;
+  initStack(&reversed);
+
+  status = validateStr(str);
+  if (status == OK && 0 < strlen(str) && strlen(str) <= 255) {
+    if (parseToStack(str, &infix) == OK) {
+      reverseStack(&infix, &reversed);
+      getPostfix(&reversed, &buffer, &infix);
+      reverseStack(&infix, &reversed);
+      *result = getResult(&reversed, x);
     }
-  } else {
-    status = ERROR;
-    *result = 0;
-  }
-  if (isnan(*result)) {
-    *result = 0;
-    status = ERROR;
-  }
-  if (isinf(*result)) {
-    *result = 0;
-    status = ERROR;
+    if (isnan(*result)) {
+      *result = NAN;
+      status = CALCULATION_ERROR;
+    }
+    if (isinf(*result)) {
+      *result = INFINITY;
+      status = CALCULATION_ERROR;
+    }
   }
   return status;
 }
 
-int inputStrToStack(char* str, Stack* stack) {
-  char buffer[260] = {0};
+int parseToStack(char* str, Stack* stack) {
+  char buffer[256] = {0};
   int strLength = (int)strlen(str);
   int status = OK;
   int minusSign = 0;
   int plusSign = 0;
   for (int i = 0; i < strLength && status == OK; i++) {
-    if (getNumber(str, stack, buffer, &i, &minusSign, &plusSign) == ERROR) {
-      status = ERROR;
+    if (getNumber(str, stack, buffer, &i, &minusSign, &plusSign) == INCORRECT_INPUT) {
+      status = INCORRECT_INPUT;
     } else {
-      processZeroPriority(str, stack, i);
-      processFirstPriority(str, stack, i, &minusSign, &plusSign);
-      processSecondPriority(str, stack, &i);
-      processThirdPriority(str, stack, i);
-      processFourthPriority(str, stack, &i);
+      setZeroPriority(str, stack, i);
+      setFirstPriority(str, stack, i, &minusSign, &plusSign);
+      setSecondPriority(str, stack, &i);
+      setThirdPriority(str, stack, i);
+      setFourthPriority(str, stack, &i);
     }
   }
   return status;
@@ -60,7 +56,6 @@ int getNumber(char* str, Stack* stack, char* buffer, int* i, int* minusSign, int
   int status = OK;
   double num = 0;
   if (isdigit(str[*i])) {
-
     int temp = *i;
     int x = 0;
     while ((isdigit(str[temp])) || (str[temp] == '.')) {
@@ -70,7 +65,7 @@ int getNumber(char* str, Stack* stack, char* buffer, int* i, int* minusSign, int
     }
     *i = temp - 1;
     if (strlen(buffer) > 1 && buffer[0] == '0' && buffer[1] != '.') {
-      status = ERROR;
+      status = INCORRECT_INPUT;
     } else {
       num = atof(buffer);
       if (*minusSign == 1) {
@@ -85,7 +80,7 @@ int getNumber(char* str, Stack* stack, char* buffer, int* i, int* minusSign, int
   return status;
 }
 
-int reverseForRpn(Stack* inputStack, Stack* reversedStack) {
+int reverseStack(Stack* inputStack, Stack* reversedStack) {
 	int status = OK;
   while (inputStack->top != NULL) {
     double data = inputStack->top->data;
@@ -97,79 +92,79 @@ int reverseForRpn(Stack* inputStack, Stack* reversedStack) {
 	return status;
 }
 
-void infixToPostfix(Stack* infixStack, Stack* bufferStack, Stack* postfixStack) {
+void getPostfix(Stack* infix, Stack* buffer, Stack* postfix) {
 	int status = OK;
-  while (infixStack->top != NULL && status == OK) {
-    if (infixStack->top->type == NUM || infixStack->top->type == X) {
-      status = push(postfixStack, infixStack->top->data, infixStack->top->type, infixStack->top->priority);
-    } else if (infixStack->top->priority == 4 || infixStack->top->type == L_BRACKET) {
-      status = push(bufferStack, infixStack->top->data, infixStack->top->type, infixStack->top->priority);
-    } else if (infixStack->top->type == R_BRACKET) {
-      while (bufferStack->top != NULL && bufferStack->top->type != L_BRACKET) {
-        status = push(postfixStack, bufferStack->top->data, bufferStack->top->type, bufferStack->top->priority);
-        pop(bufferStack);
+  while (infix->top != NULL && status == OK) {
+    if (infix->top->type == NUM || infix->top->type == X) {
+      status = push(postfix, infix->top->data, infix->top->type, infix->top->priority);
+    } else if (infix->top->priority == 4 || infix->top->type == LEFT_BRACKET) {
+      status = push(buffer, infix->top->data, infix->top->type, infix->top->priority);
+    } else if (infix->top->type == RIGHT_BRACKET) {
+      while (buffer->top != NULL && buffer->top->type != LEFT_BRACKET) {
+        status = push(postfix, buffer->top->data, buffer->top->type, buffer->top->priority);
+        pop(buffer);
       }
-      if (bufferStack->top != NULL) {
-        pop(bufferStack);
+      if (buffer->top != NULL) {
+        pop(buffer);
       }
-    } else if (bufferStack->top == NULL || (infixStack->top->priority > bufferStack->top->priority)) {
-      status = push(bufferStack, infixStack->top->data, infixStack->top->type, infixStack->top->priority);
-    } else if ((bufferStack->top != NULL) && (infixStack->top->priority <= bufferStack->top->priority) && infixStack->top->type != R_BRACKET) {
-      if (bufferStack->top->priority == 3 && infixStack->top->priority == 3) {
-        status = push(bufferStack, infixStack->top->data, infixStack->top->type, infixStack->top->priority);
+    } else if (buffer->top == NULL || (infix->top->priority > buffer->top->priority)) {
+      status = push(buffer, infix->top->data, infix->top->type, infix->top->priority);
+    } else if ((buffer->top != NULL) && (infix->top->priority <= buffer->top->priority) && infix->top->type != RIGHT_BRACKET) {
+      if (buffer->top->priority == 3 && infix->top->priority == 3) {
+        status = push(buffer, infix->top->data, infix->top->type, infix->top->priority);
       } else {
-        while ((bufferStack->top != NULL) && (infixStack->top->priority <= bufferStack->top->priority)) {
-          status = push(postfixStack, bufferStack->top->data, bufferStack->top->type, bufferStack->top->priority);
-          pop(bufferStack);
+        while ((buffer->top != NULL) && (infix->top->priority <= buffer->top->priority)) {
+          status = push(postfix, buffer->top->data, buffer->top->type, buffer->top->priority);
+          pop(buffer);
         }
-        status = push(bufferStack, infixStack->top->data, infixStack->top->type, infixStack->top->priority);
+        status = push(buffer, infix->top->data, infix->top->type, infix->top->priority);
       }
     }
-    pop(infixStack);
+    pop(infix);
   }
 
-  if (infixStack->top == NULL && bufferStack->top != NULL) {
-    while (bufferStack->top != NULL) {
-      status = push(postfixStack, bufferStack->top->data, bufferStack->top->type, bufferStack->top->priority);
-      pop(bufferStack);
+  if (infix->top == NULL && buffer->top != NULL) {
+    while (buffer->top != NULL) {
+      status = push(postfix, buffer->top->data, buffer->top->type, buffer->top->priority);
+      pop(buffer);
     }
   }
 }
 
 
-double calculateResult(Stack* inputRpnStack, double x) {
+double getResult(Stack* inputRpnStack, double x) {
   double res_value = 0;
 	int status = OK;
 
-  Stack bufferStack;
-  initStack(&bufferStack);
+  Stack buffer;
+  initStack(&buffer);
 
   while (inputRpnStack->top != NULL && status == OK) {
     if (inputRpnStack->top->type == NUM || inputRpnStack->top->type == X) {
       if (inputRpnStack->top->type == X) {
-        status = push(&bufferStack, x, X, inputRpnStack->top->priority);
+        status = push(&buffer, x, X, inputRpnStack->top->priority);
       } else {
-        status = push(&bufferStack, inputRpnStack->top->data, inputRpnStack->top->type, inputRpnStack->top->priority);
+        status = push(&buffer, inputRpnStack->top->data, inputRpnStack->top->type, inputRpnStack->top->priority);
       }
       pop(inputRpnStack);
     } else if (inputRpnStack->top->type != NUM) {
       double result = 0;
       if (inputRpnStack->top->priority == 4) {
-        if (inputRpnStack->top->type == SIN)  result = sin(bufferStack.top->data);
-        if (inputRpnStack->top->type == ASIN) result = asin(bufferStack.top->data);
-        if (inputRpnStack->top->type == COS)  result = cos(bufferStack.top->data);
-        if (inputRpnStack->top->type == ACOS) result = acos(bufferStack.top->data);
-        if (inputRpnStack->top->type == TAN)  result = tan(bufferStack.top->data);
-        if (inputRpnStack->top->type == ATAN) result = atan(bufferStack.top->data);
-        if (inputRpnStack->top->type == SQRT) result = sqrt(bufferStack.top->data);
-        if (inputRpnStack->top->type == LOG)  result = log10(bufferStack.top->data);
-        if (inputRpnStack->top->type == LN)   result = log(bufferStack.top->data);
-        pop(&bufferStack);
+        if (inputRpnStack->top->type == SIN)  result = sin(buffer.top->data);
+        if (inputRpnStack->top->type == ASIN) result = asin(buffer.top->data);
+        if (inputRpnStack->top->type == COS)  result = cos(buffer.top->data);
+        if (inputRpnStack->top->type == ACOS) result = acos(buffer.top->data);
+        if (inputRpnStack->top->type == TAN)  result = tan(buffer.top->data);
+        if (inputRpnStack->top->type == ATAN) result = atan(buffer.top->data);
+        if (inputRpnStack->top->type == SQRT) result = sqrt(buffer.top->data);
+        if (inputRpnStack->top->type == LOG)  result = log10(buffer.top->data);
+        if (inputRpnStack->top->type == LN)   result = log(buffer.top->data);
+        pop(&buffer);
         pop(inputRpnStack);
-        status = push(&bufferStack, result, NUM, 0);
+        status = push(&buffer, result, NUM, 0);
       } else {
-        double firstLexeme = pop(&bufferStack);
-        double secondLexeme = pop(&bufferStack);
+        double firstLexeme = pop(&buffer);
+        double secondLexeme = pop(&buffer);
         if (inputRpnStack->top->type == PLUS)  result = secondLexeme + firstLexeme;
         if (inputRpnStack->top->type == MINUS) result = secondLexeme - firstLexeme;
         if (inputRpnStack->top->type == MULT)  result = secondLexeme * firstLexeme;
@@ -177,11 +172,11 @@ double calculateResult(Stack* inputRpnStack, double x) {
         if (inputRpnStack->top->type == MOD)   result = fmod(secondLexeme, firstLexeme);
         if (inputRpnStack->top->type == EXP)   result = pow(secondLexeme, firstLexeme);
         pop(inputRpnStack);
-        push(&bufferStack, result, NUM, 0);
+        push(&buffer, result, NUM, 0);
       }
     }
   }
-  res_value = bufferStack.top->data;
-  pop(&bufferStack);
+  res_value = buffer.top->data;
+  pop(&buffer);
   return res_value;
 }
