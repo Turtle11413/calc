@@ -1,7 +1,7 @@
 #include "calc.h"
 
 int setZeroPriority(char* str, Stack* stack, int i) {
-	int status = OK;
+  int status = OK;
   switch (str[i]) {
     case '(':
       status = push(stack, '(', LEFT_BRACKET, 0);
@@ -13,11 +13,11 @@ int setZeroPriority(char* str, Stack* stack, int i) {
       status = push(stack, 'x', X, 0);
       break;
   }
-	return status;
+  return status;
 }
 
 int setFirstPriority(char* str, Stack* stack, int i, int* minusSign, int* plusSign) {
-	int status = OK;
+  int status = OK;
   if (str[i] == '+') {
     if (i == 0 || (str[i - 1] == '(')) {
       *plusSign = 1;
@@ -33,11 +33,11 @@ int setFirstPriority(char* str, Stack* stack, int i, int* minusSign, int* plusSi
       status = push(stack, '-', MINUS, 1);
     }
   }
-	return status;
+  return status;
 }
 
 int setSecondPriority(char* str, Stack* stack, int* i) {
-	int status = OK;
+  int status = OK;
   if (str[*i] == '*') {
     status = push(stack, '*', MULT, 2);
   } else if (str[*i] == '/') {
@@ -46,19 +46,19 @@ int setSecondPriority(char* str, Stack* stack, int* i) {
     status = push(stack, 'm', MOD, 2);
     *i = *i + 2;
   }
-	return status;
+  return status;
 }
 
 int setThirdPriority(char* str, Stack* stack, int i) {
-	int status = OK;
+  int status = OK;
   if (str[i] == '^') {
     status = push(stack, '^', EXP, 3);
   }
-	return status;
+  return status;
 }
 
 int setFourthPriority(char* str, Stack* stack, int* i) {
-	int status = OK;
+  int status = OK;
   if (str[*i] == 'c') {
     status = push(stack, 'c', COS, 4);
     *i += 2;
@@ -83,7 +83,7 @@ int setFourthPriority(char* str, Stack* stack, int* i) {
     }
   } else if (str[*i] == 'a') {
     if (str[*i + 1] == 's') {
-       status = push(stack, 'S', ASIN, 4);
+      status = push(stack, 'S', ASIN, 4);
     } else if (str[*i + 1] == 'c') {
       status = push(stack, 'C', ACOS, 4);
     } else {
@@ -91,5 +91,5 @@ int setFourthPriority(char* str, Stack* stack, int* i) {
     }
     *i += 3;
   }
-	return status;
+  return status;
 }

@@ -13,13 +13,14 @@ int processing(char* str, double* result, double x) {
   initStack(&reversed);
 
   status = validateStr(str);
-  if (status == OK && 0 < strlen(str) && strlen(str) <= 255) {
-    if (parseToStack(str, &infix) == OK) {
-      reverseStack(&infix, &reversed);
-      getPostfix(&reversed, &buffer, &infix);
-      reverseStack(&infix, &reversed);
-      *result = getResult(&reversed, x);
-    }
+  if (status == OK) {
+
+    parseToStack(str, &infix);
+    reverseStack(&infix, &reversed);
+    getPostfix(&reversed, &buffer, &infix);
+    reverseStack(&infix, &reversed);
+    status = getResult(&reversed, x, result);
+
     if (isnan(*result)) {
       *result = NAN;
       status = CALCULATION_ERROR;
@@ -33,17 +34,14 @@ int processing(char* str, double* result, double x) {
 }
 
 int parseToStack(char* str, Stack* stack) {
-  char buffer[256] = {0};
-  int strLength = (int)strlen(str);
   int status = OK;
-  int minusSign = 0;
-  int plusSign = 0;
-  for (int i = 0; i < strLength && status == OK; i++) {
-    if (getNumber(str, stack, buffer, &i, &minusSign, &plusSign) == INCORRECT_INPUT) {
-      status = INCORRECT_INPUT;
-    } else {
+  int unaryPlus = 0, unaryMinus = 0;
+  int len = (int)strlen(str);
+  for (int i = 0; i < len && status == OK; i++) {
+    status = getNumber(str, stack, &i, &unaryMinus, &unaryPlus);
+    if (status == OK) {
       setZeroPriority(str, stack, i);
-      setFirstPriority(str, stack, i, &minusSign, &plusSign);
+      setFirstPriority(str, stack, i, &unaryMinus, &unaryPlus);
       setSecondPriority(str, stack, &i);
       setThirdPriority(str, stack, i);
       setFourthPriority(str, stack, &i);
@@ -52,36 +50,34 @@ int parseToStack(char* str, Stack* stack) {
   return status;
 }
 
-int getNumber(char* str, Stack* stack, char* buffer, int* i, int* minusSign, int* plusSign) {
+int getNumber(char* str, Stack* stack, int* i, int* unaryMinus, int* unaryPlus) {
+  char buffer[256] = {0};
   int status = OK;
   double num = 0;
   if (isdigit(str[*i])) {
-    int temp = *i;
-    int x = 0;
-    while ((isdigit(str[temp])) || (str[temp] == '.')) {
-      buffer[x] = str[temp];
-      x++;
-      temp++;
-    }
-    *i = temp - 1;
-    if (strlen(buffer) > 1 && buffer[0] == '0' && buffer[1] != '.') {
-      status = INCORRECT_INPUT;
-    } else {
-      num = atof(buffer);
-      if (*minusSign == 1) {
-        num *= -1;
+    int dot_count = 0;
+    int buffer_index = 0;
+    while ((isdigit(str[*i])) || (str[*i] == '.')) {
+      if (str[*i] == '.') {
+        dot_count++;
       }
-      status = push(stack, num, NUM, 0);
-      memset(buffer, '\0', (size_t)sizeof(buffer));
+      if (dot_count <= 1) {
+        buffer[buffer_index++] = str[(*i)++];
+      }
     }
+    num = atof(buffer);
+    if (*unaryMinus == 1) {
+      num *= -1;
+    }
+    status = push(stack, num, NUM, 0);
   }
-  *minusSign = 0;
-  *plusSign = 0;
+  *unaryMinus = 0;
+  *unaryPlus = 0;
   return status;
 }
 
 int reverseStack(Stack* inputStack, Stack* reversedStack) {
-	int status = OK;
+  int status = OK;
   while (inputStack->top != NULL) {
     double data = inputStack->top->data;
     int type = inputStack->top->type;
@@ -89,11 +85,11 @@ int reverseStack(Stack* inputStack, Stack* reversedStack) {
     status = push(reversedStack, data, type, priority);
     pop(inputStack);
   }
-	return status;
+  return status;
 }
 
-void getPostfix(Stack* infix, Stack* buffer, Stack* postfix) {
-	int status = OK;
+int getPostfix(Stack* infix, Stack* buffer, Stack* postfix) {
+  int status = OK;
   while (infix->top != NULL && status == OK) {
     if (infix->top->type == NUM || infix->top->type == X) {
       status = push(postfix, infix->top->data, infix->top->type, infix->top->priority);
@@ -129,12 +125,12 @@ void getPostfix(Stack* infix, Stack* buffer, Stack* postfix) {
       pop(buffer);
     }
   }
+  return status;
 }
 
 
-double getResult(Stack* inputRpnStack, double x) {
-  double res_value = 0;
-	int status = OK;
+int getResult(Stack* inputRpnStack, double x, double* result) {
+  int status = OK;
 
   Stack buffer;
   initStack(&buffer);
@@ -176,7 +172,7 @@ double getResult(Stack* inputRpnStack, double x) {
       }
     }
   }
-  res_value = buffer.top->data;
+  *result = buffer.top->data;
   pop(&buffer);
-  return res_value;
+  return status;
 }

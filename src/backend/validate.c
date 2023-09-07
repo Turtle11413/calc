@@ -2,6 +2,9 @@
 
 int validateStr(char* str) {
   int status = OK;
+  if (strlen(str) == 0 || strlen(str) > 255) {
+    status = INCORRECT_INPUT;
+  }
   if (validateBrackets(str) || validateDots(str) || validateOperators(str) || validateTrig(str) || validateOtherFuncs(str)) {
     status = INCORRECT_INPUT;
   }
@@ -71,13 +74,13 @@ int validateDots(char* str) {
   while (*ptr != '\0' && status == OK) {
     int dotsCount = 0;
     if (isdigit(*ptr)) {
-      while ((*ptr >= '0' && *ptr <= '9') || *ptr == '.') {
+      while (isdigit(*ptr) || *ptr == '.') {
         if (*ptr == '.') dotsCount++;
         ptr++;
       }
       ptr--;
     }
-    if (dotsCount > 1 || *ptr == '.') {
+    if (dotsCount > 1) {
       status = INCORRECT_INPUT;
     }
     ptr++;

@@ -12,7 +12,6 @@
 #define MEMORY_ERROR 2
 #define INCORRECT_INPUT 3
 
-
 typedef struct Node {
   double data;
   int type;
@@ -64,7 +63,7 @@ int validateOtherFuncs(char* str);
 
 // -------------------- set priority --------------------
 int setZeroPriority(char* str, Stack* stack, int i);
-int setFirstPriority(char* str, Stack* stack, int i, int* minusSign, int* plusSign);
+int setFirstPriority(char* str, Stack* stack, int i, int* unaryMinus, int* unaryPlus);
 int setSecondPriority(char* str, Stack* stack, int* i);
 int setThirdPriority(char* str, Stack* stack, int i);
 int setFourthPriority(char* str, Stack* stack, int* i);
@@ -74,9 +73,9 @@ int setFourthPriority(char* str, Stack* stack, int* i);
 int parseToStack(char* str, Stack* stack);
 int reverseStack(Stack* inputStack, Stack* reversedStack);
 int processing(char* str, double* result, double x);
-int getNumber(char* str, Stack* stack, char* buffer, int* i, int* minusSign, int* plusSign);
-void getPostfix(Stack* infixStack, Stack* bufferStack, Stack* postfixStack);
-double getResult(Stack* inputRpnList, double x);
+int getNumber(char* str, Stack* stack, int* i, int* unaryMinus, int* unaryPlus);
+int getPostfix(Stack* infixStack, Stack* bufferStack, Stack* postfixStack);
+int getResult(Stack* inputRpnList, double x, double* result);
 // ----------------------------------------------------
 
 #endif  // SRC_CALC_H
