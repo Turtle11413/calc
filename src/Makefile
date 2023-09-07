@@ -1,5 +1,6 @@
 CC = gcc
 FLAGS = -Wall -Werror -Wextra
+GCOV = -fprofile-arcs -ftest-coverage
 OS:=$(shell uname)
 
 clang:
@@ -10,12 +11,6 @@ build_main:
 
 main: build_main
 	./main.out
-
-build_test: 
-	$(CC) $(FLAGS) -lm -lcheck test.c backend/*.c -o test.out
-
-test: build_test
-	./test.out
 
 valgrind_main: build_main
 	valgrind --tool=memcheck --leak-check=yes ./main.out
@@ -28,6 +23,20 @@ leaks_main: build_main
 
 leaks_test: build_test
 	leaks -atExit -- ./test.out
+
+build_test:
+	$(CC) $(FLAGS) -lm -lcheck test.c backend/*.c -o test.out
+
+test: build_test
+	./test.out
+
+
+gcov_report:
+	$(CC) $(GCOV) test.c backend/*.c -o test.out -lcheck
+	./test.out
+	lcov -t "test" -o test.info -c -d ./
+	genhtml test.info -o report
+	open report/index.html
 
 clean:
 	rm -rf *.o

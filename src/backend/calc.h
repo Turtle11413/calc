@@ -11,19 +11,16 @@
 #define CALCULATION_ERROR 1
 #define MEMORY_ERROR 2
 #define INCORRECT_INPUT 3
+#define NAN_RESULT 4
+#define INF_RESULT 5
 
-typedef struct Node {
-  double data;
+typedef struct Lexeme {
+  double value;
   int type;
   int priority;
-  struct Node* next;
-} Node;
+} Lexeme;
 
-typedef struct Stack {
-  Node* top;
-} Stack;
-
-typedef enum lexem_type {
+typedef enum lexeme_type {
   NUM,
   X,
   LEFT_BRACKET,
@@ -43,15 +40,24 @@ typedef enum lexem_type {
   SQRT,
   LN,
   LOG
-} lexem_type;
+} lexeme_type;
 
-// -------------------- stack --------------------
+typedef struct Node {
+  Lexeme lexeme;
+  struct Node* next;
+} Node;
+
+typedef struct Stack {
+  Node* top;
+} Stack;
+
+// -------------------- stack --------------------------
 void initStack(Stack* stack);
-int push(Stack* stack, double data, int type, int priority);
+int push(Stack* stack, Lexeme addLexeme);
 double pop(Stack* stack);
-// ------------------------------------------------
+// -----------------------------------------------------
 
-// -------------------- validate string --------------------
+// -------------------- validate string ----------------
 int validateStr(char* str);
 int validateDots(char* str);
 int validateBrackets(char* str);
@@ -59,23 +65,34 @@ int validateBracketsPosition(char* str);
 int validateOperators(char* str);
 int validateTrig(char* str);
 int validateOtherFuncs(char* str);
-// ---------------------------------------------------------
+int validateX(char* str);
+// -----------------------------------------------------
 
-// -------------------- set priority --------------------
+// -------------------- set priority -------------------
 int setZeroPriority(char* str, Stack* stack, int i);
-int setFirstPriority(char* str, Stack* stack, int i, int* unaryMinus, int* unaryPlus);
+int setFirstPriority(char* str, Stack* stack, int i, int* unaryMinus,
+                     int* unaryPlus);
 int setSecondPriority(char* str, Stack* stack, int* i);
 int setThirdPriority(char* str, Stack* stack, int i);
 int setFourthPriority(char* str, Stack* stack, int* i);
-// -------------------- calculate --------------------
+// -----------------------------------------------------
 
-// -------------------------------------------------------
+// --------------------- rpn ----------------------------
 int parseToStack(char* str, Stack* stack);
 int reverseStack(Stack* inputStack, Stack* reversedStack);
-int processing(char* str, double* result, double x);
 int getNumber(char* str, Stack* stack, int* i, int* unaryMinus, int* unaryPlus);
 int getPostfix(Stack* infixStack, Stack* bufferStack, Stack* postfixStack);
-int getResult(Stack* inputRpnList, double x, double* result);
-// ----------------------------------------------------
+// -------------------------------------------------------
 
-#endif  // SRC_CALC_H
+// -------------------- calculate ------------------------
+int calculateResult(Stack* rpn, double x, double* result);
+double calculateTrig(Lexeme* operation, Lexeme* number);
+double calculateSimpleOperation(Lexeme* operation, double firstNumber,
+                                double secondNumber);
+// -------------------------------------------------------
+
+//-------------------------------------------------------
+int from_answer(char* str, double* result, double x);
+//-------------------------------------------------------
+
+#endif

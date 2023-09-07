@@ -1,33 +1,37 @@
 #include "calc.h"
 
-int processing(char* str, double* result, double x) {
+int from_answer(char* str, double* result, double x) {
   int status = OK;
   *result = 0;
   Stack infix;
-  initStack(&infix);
-
-  Stack buffer;
-  initStack(&buffer);
-
   Stack reversed;
-  initStack(&reversed);
+  Stack buffer;
 
   status = validateStr(str);
   if (status == OK) {
-
-    parseToStack(str, &infix);
-    reverseStack(&infix, &reversed);
-    getPostfix(&reversed, &buffer, &infix);
-    reverseStack(&infix, &reversed);
-    status = getResult(&reversed, x, result);
-
+    initStack(&infix);
+    status = parseToStack(str, &infix);
+  }
+  if (status == OK) {
+    initStack(&reversed);
+    status = reverseStack(&infix, &reversed);
+  }
+  if (status == OK) {
+    initStack(&buffer);
+    status = getPostfix(&reversed, &buffer, &infix);
+  }
+  if (status == OK) {
+    status = reverseStack(&infix, &reversed);
+  }
+  if (status == OK) {
+    status = calculateResult(&reversed, x, result);
     if (isnan(*result)) {
       *result = NAN;
-      status = CALCULATION_ERROR;
+      status = NAN_RESULT;
     }
     if (isinf(*result)) {
       *result = INFINITY;
-      status = CALCULATION_ERROR;
+      status = INF_RESULT;
     }
   }
   return status;
@@ -50,7 +54,8 @@ int parseToStack(char* str, Stack* stack) {
   return status;
 }
 
-int getNumber(char* str, Stack* stack, int* i, int* unaryMinus, int* unaryPlus) {
+int getNumber(char* str, Stack* stack, int* i, int* unaryMinus,
+              int* unaryPlus) {
   char buffer[256] = {0};
   int status = OK;
   double num = 0;
@@ -69,7 +74,8 @@ int getNumber(char* str, Stack* stack, int* i, int* unaryMinus, int* unaryPlus) 
     if (*unaryMinus == 1) {
       num *= -1;
     }
-    status = push(stack, num, NUM, 0);
+    Lexeme tmpLexeme = {num, NUM, 0};
+    status = push(stack, tmpLexeme);
   }
   *unaryMinus = 0;
   *unaryPlus = 0;
@@ -79,10 +85,7 @@ int getNumber(char* str, Stack* stack, int* i, int* unaryMinus, int* unaryPlus) 
 int reverseStack(Stack* inputStack, Stack* reversedStack) {
   int status = OK;
   while (inputStack->top != NULL) {
-    double data = inputStack->top->data;
-    int type = inputStack->top->type;
-    int priority = inputStack->top->priority;
-    status = push(reversedStack, data, type, priority);
+    status = push(reversedStack, inputStack->top->lexeme);
     pop(inputStack);
   }
   return status;
@@ -91,29 +94,35 @@ int reverseStack(Stack* inputStack, Stack* reversedStack) {
 int getPostfix(Stack* infix, Stack* buffer, Stack* postfix) {
   int status = OK;
   while (infix->top != NULL && status == OK) {
-    if (infix->top->type == NUM || infix->top->type == X) {
-      status = push(postfix, infix->top->data, infix->top->type, infix->top->priority);
-    } else if (infix->top->priority == 4 || infix->top->type == LEFT_BRACKET) {
-      status = push(buffer, infix->top->data, infix->top->type, infix->top->priority);
-    } else if (infix->top->type == RIGHT_BRACKET) {
-      while (buffer->top != NULL && buffer->top->type != LEFT_BRACKET) {
-        status = push(postfix, buffer->top->data, buffer->top->type, buffer->top->priority);
+    if (infix->top->lexeme.type == NUM || infix->top->lexeme.type == X) {
+      status = push(postfix, infix->top->lexeme);
+    } else if (infix->top->lexeme.priority == 4 ||
+               infix->top->lexeme.type == LEFT_BRACKET) {
+      status = push(buffer, infix->top->lexeme);
+    } else if (infix->top->lexeme.type == RIGHT_BRACKET) {
+      while (buffer->top != NULL && buffer->top->lexeme.type != LEFT_BRACKET) {
+        status = push(postfix, buffer->top->lexeme);
         pop(buffer);
       }
       if (buffer->top != NULL) {
         pop(buffer);
       }
-    } else if (buffer->top == NULL || (infix->top->priority > buffer->top->priority)) {
-      status = push(buffer, infix->top->data, infix->top->type, infix->top->priority);
-    } else if ((buffer->top != NULL) && (infix->top->priority <= buffer->top->priority) && infix->top->type != RIGHT_BRACKET) {
-      if (buffer->top->priority == 3 && infix->top->priority == 3) {
-        status = push(buffer, infix->top->data, infix->top->type, infix->top->priority);
+    } else if (buffer->top == NULL ||
+               (infix->top->lexeme.priority > buffer->top->lexeme.priority)) {
+      status = push(buffer, infix->top->lexeme);
+    } else if ((buffer->top != NULL) &&
+               (infix->top->lexeme.priority <= buffer->top->lexeme.priority) &&
+               infix->top->lexeme.type != RIGHT_BRACKET) {
+      if (buffer->top->lexeme.priority == 3 &&
+          infix->top->lexeme.priority == 3) {
+        status = push(buffer, infix->top->lexeme);
       } else {
-        while ((buffer->top != NULL) && (infix->top->priority <= buffer->top->priority)) {
-          status = push(postfix, buffer->top->data, buffer->top->type, buffer->top->priority);
+        while ((buffer->top != NULL) &&
+               (infix->top->lexeme.priority <= buffer->top->lexeme.priority)) {
+          status = push(postfix, buffer->top->lexeme);
           pop(buffer);
         }
-        status = push(buffer, infix->top->data, infix->top->type, infix->top->priority);
+        status = push(buffer, infix->top->lexeme);
       }
     }
     pop(infix);
@@ -121,58 +130,77 @@ int getPostfix(Stack* infix, Stack* buffer, Stack* postfix) {
 
   if (infix->top == NULL && buffer->top != NULL) {
     while (buffer->top != NULL) {
-      status = push(postfix, buffer->top->data, buffer->top->type, buffer->top->priority);
+      status = push(postfix, buffer->top->lexeme);
       pop(buffer);
     }
   }
   return status;
 }
 
-
-int getResult(Stack* inputRpnStack, double x, double* result) {
+int calculateResult(Stack* rpn, double x, double* result) {
   int status = OK;
 
   Stack buffer;
   initStack(&buffer);
 
-  while (inputRpnStack->top != NULL && status == OK) {
-    if (inputRpnStack->top->type == NUM || inputRpnStack->top->type == X) {
-      if (inputRpnStack->top->type == X) {
-        status = push(&buffer, x, X, inputRpnStack->top->priority);
+  while (rpn->top != NULL && status == OK) {
+    if (rpn->top->lexeme.type == NUM || rpn->top->lexeme.type == X) {
+      if (rpn->top->lexeme.type == X) {
+        Lexeme tmpLexeme = {x, NUM, 0};
+        status = push(&buffer, tmpLexeme);
       } else {
-        status = push(&buffer, inputRpnStack->top->data, inputRpnStack->top->type, inputRpnStack->top->priority);
+        status = push(&buffer, rpn->top->lexeme);
       }
-      pop(inputRpnStack);
-    } else if (inputRpnStack->top->type != NUM) {
+      pop(rpn);
+    } else if (rpn->top->lexeme.type != NUM) {
       double result = 0;
-      if (inputRpnStack->top->priority == 4) {
-        if (inputRpnStack->top->type == SIN)  result = sin(buffer.top->data);
-        if (inputRpnStack->top->type == ASIN) result = asin(buffer.top->data);
-        if (inputRpnStack->top->type == COS)  result = cos(buffer.top->data);
-        if (inputRpnStack->top->type == ACOS) result = acos(buffer.top->data);
-        if (inputRpnStack->top->type == TAN)  result = tan(buffer.top->data);
-        if (inputRpnStack->top->type == ATAN) result = atan(buffer.top->data);
-        if (inputRpnStack->top->type == SQRT) result = sqrt(buffer.top->data);
-        if (inputRpnStack->top->type == LOG)  result = log10(buffer.top->data);
-        if (inputRpnStack->top->type == LN)   result = log(buffer.top->data);
+      if (rpn->top->lexeme.priority == 4) {
+        Lexeme operation = rpn->top->lexeme;
+        Lexeme number = buffer.top->lexeme;
+        result = calculateTrig(&operation, &number);
         pop(&buffer);
-        pop(inputRpnStack);
-        status = push(&buffer, result, NUM, 0);
+        pop(rpn);
+        Lexeme tmpLexeme = {result, NUM, 0};
+        status = push(&buffer, tmpLexeme);
       } else {
-        double firstLexeme = pop(&buffer);
-        double secondLexeme = pop(&buffer);
-        if (inputRpnStack->top->type == PLUS)  result = secondLexeme + firstLexeme;
-        if (inputRpnStack->top->type == MINUS) result = secondLexeme - firstLexeme;
-        if (inputRpnStack->top->type == MULT)  result = secondLexeme * firstLexeme;
-        if (inputRpnStack->top->type == DIV)   result = secondLexeme / firstLexeme;
-        if (inputRpnStack->top->type == MOD)   result = fmod(secondLexeme, firstLexeme);
-        if (inputRpnStack->top->type == EXP)   result = pow(secondLexeme, firstLexeme);
-        pop(inputRpnStack);
-        push(&buffer, result, NUM, 0);
+        Lexeme operation = rpn->top->lexeme;
+        double firstNumber = pop(&buffer);
+        double secondNumber = pop(&buffer);
+        result =
+            calculateSimpleOperation(&operation, firstNumber, secondNumber);
+        pop(rpn);
+        Lexeme tmpLexeme = {result, NUM, 0};
+        push(&buffer, tmpLexeme);
       }
     }
   }
-  *result = buffer.top->data;
+  *result = buffer.top->lexeme.value;
   pop(&buffer);
   return status;
+}
+
+double calculateTrig(Lexeme* operation, Lexeme* number) {
+  double result = 0;
+  if (operation->type == SIN) result = sin(number->value);
+  if (operation->type == ASIN) result = asin(number->value);
+  if (operation->type == COS) result = cos(number->value);
+  if (operation->type == ACOS) result = acos(number->value);
+  if (operation->type == TAN) result = tan(number->value);
+  if (operation->type == ATAN) result = atan(number->value);
+  if (operation->type == SQRT) result = sqrt(number->value);
+  if (operation->type == LOG) result = log10(number->value);
+  if (operation->type == LN) result = log(number->value);
+  return result;
+}
+
+double calculateSimpleOperation(Lexeme* operation, double firstNumber,
+                                double secondNumber) {
+  double result = 0;
+  if (operation->type == PLUS) result = firstNumber + secondNumber;
+  if (operation->type == MINUS) result = secondNumber - firstNumber;
+  if (operation->type == MULT) result = firstNumber * secondNumber;
+  if (operation->type == DIV) result = secondNumber / firstNumber;
+  if (operation->type == MOD) result = fmod(secondNumber, firstNumber);
+  if (operation->type == EXP) result = pow(secondNumber, firstNumber);
+  return result;
 }

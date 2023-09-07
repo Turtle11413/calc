@@ -5,7 +5,8 @@ int validateStr(char* str) {
   if (strlen(str) == 0 || strlen(str) > 255) {
     status = INCORRECT_INPUT;
   }
-  if (validateBrackets(str) || validateDots(str) || validateOperators(str) || validateTrig(str) || validateOtherFuncs(str)) {
+  if (validateBrackets(str) || validateDots(str) || validateOperators(str) ||
+      validateTrig(str) || validateOtherFuncs(str) || validateX(str)) {
     status = INCORRECT_INPUT;
   }
   return status;
@@ -95,7 +96,8 @@ int validateOperators(char* str) {
     if (strchr("+-", str[i])) {
       if (i == strLength - 1) status = INCORRECT_INPUT;
       if (i != 0 && i != strLength - 1) {
-        if (i > 0 && (strchr(")/*^", str[i + 1]) || strchr("/*^+-", str[i - 1])))
+        if (i > 0 &&
+            (strchr(")/*^", str[i + 1]) || strchr("/*^+-", str[i - 1])))
           status = INCORRECT_INPUT;
       }
     }
@@ -103,7 +105,8 @@ int validateOperators(char* str) {
     if (strchr("/*^", str[i])) {
       if (i == 0 || i == strLength - 1) status = INCORRECT_INPUT;
       if (i != 0 && i != strLength - 1) {
-        if (i > 0 && (strchr(")/*^", str[i + 1]) || strchr("/*^+-", str[i - 1])))
+        if (i > 0 &&
+            (strchr(")/*^", str[i + 1]) || strchr("/*^+-", str[i - 1])))
           status = INCORRECT_INPUT;
       }
     }
@@ -132,8 +135,7 @@ int validateTrig(char* str) {
         status = INCORRECT_INPUT;
       }
       if (i != 0 || i < strLength - 6) {
-        if (i > 0 &&
-            (strchr(")x", str[i - 1]) || isdigit(str[i - 1])))
+        if (i > 0 && (strchr(")x", str[i - 1]) || isdigit(str[i - 1])))
           status = INCORRECT_INPUT;
       }
       i += 2;
@@ -144,8 +146,7 @@ int validateTrig(char* str) {
         status = INCORRECT_INPUT;
       }
       if (i != 0 || i < strLength - 7) {
-        if (i > 0 &&
-            (strchr(")x", str[i - 1]) || isdigit(str[i - 1])))
+        if (i > 0 && (strchr(")x", str[i - 1]) || isdigit(str[i - 1])))
           status = INCORRECT_INPUT;
       }
       i += 3;
@@ -164,8 +165,7 @@ int validateOtherFuncs(char* str) {
         status = INCORRECT_INPUT;
       }
       if (i != 0 || i < strLength - 5) {
-        if (i > 0 &&
-            (strchr(")x", str[i - 1]) || isdigit(str[i - 1])))
+        if (i > 0 && (strchr(")x", str[i - 1]) || isdigit(str[i - 1])))
           status = INCORRECT_INPUT;
       }
       i++;
@@ -176,8 +176,7 @@ int validateOtherFuncs(char* str) {
         status = INCORRECT_INPUT;
       }
       if (i != 0 || i < strLength - 7) {
-        if (i > 0 &&
-            (strchr(")x", str[i - 1]) || isdigit(str[i - 1])))
+        if (i > 0 && (strchr(")x", str[i - 1]) || isdigit(str[i - 1])))
           status = INCORRECT_INPUT;
       }
       if (str[i + 5] == '-') {
@@ -191,8 +190,7 @@ int validateOtherFuncs(char* str) {
         status = INCORRECT_INPUT;
       }
       if (i != 0 || i < strLength - 6) {
-        if (i > 0 &&
-            (strchr(")x", str[i - 1]) || isdigit(str[i - 1])))
+        if (i > 0 && (strchr(")x", str[i - 1]) || isdigit(str[i - 1])))
           status = INCORRECT_INPUT;
       }
       i += 2;
@@ -206,20 +204,19 @@ int validateX(char* str) {
   int strLength = (int)strlen(str);
   for (int i = 0; i < strLength && status == OK; i++) {
     if (str[i] == 'x') {
-      if (i == 0 &&
-          (isdigit(str[i + 1]) || strchr(")x", str[i + 1]))) {
+      if (i == 0 && (isdigit(str[i + 1]) || strchr(")x", str[i + 1]))) {
         status = INCORRECT_INPUT;
       }
       if (i == strLength - 1 &&
           (isdigit(str[i - 1]) || strchr(")x", str[i - 1]))) {
         status = INCORRECT_INPUT;
       }
-      if (i > 0 && i < strLength - 1 && (isdigit(str[i + 1]) || str[i + 1] == '(' || str[i + 1] == 'x')) {
+      if (i > 0 && i < strLength - 1 &&
+          (isdigit(str[i + 1]) || str[i + 1] == '(' || str[i + 1] == 'x')) {
         status = INCORRECT_INPUT;
       }
       if (i > 0 && i < strLength - 1 &&
-          (isdigit(str[i - 1]) || str[i - 1] == ')' ||
-           str[i - 1] == 'x')) {
+          (isdigit(str[i - 1]) || str[i - 1] == ')' || str[i - 1] == 'x')) {
         status = INCORRECT_INPUT;
       }
     }
