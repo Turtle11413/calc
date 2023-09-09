@@ -1,187 +1,207 @@
 #include "calc.h"
 
-int processing(char* str, double* result, double x) {
+int from_answer(char* str, double* result, double x) {
   int status = OK;
+  *result = 0;
   Stack infix;
-  initStack(&infix);
-
   Stack reversed;
-  initStack(&reversed);
+  Stack buffer;
+
+  status = validateStr(str);
+	
+  if (status == OK) {
+    initStack(&infix);
+    status = parseToStack(str, &infix);
+  }
+  if (status == OK) {
+    initStack(&reversed);
+    status = reverseStack(&infix, &reversed);
+  }
+  if (status == OK) {
+    initStack(&buffer);
+    status = getPostfix(&reversed, &buffer, &infix);
+  }
+  if (status == OK) {
+    status = reverseStack(&infix, &reversed);
+  }
+  if (status == OK) {
+    status = calculateResult(&reversed, x, result);
+    if (isnan(*result)) {
+      *result = NAN;
+      status = NAN_RESULT;
+    }
+    if (isinf(*result)) {
+      *result = INFINITY;
+      status = INF_RESULT;
+    }
+  }
+  return status;
+}
+
+int parseToStack(char* str, Stack* stack) {
+  int status = OK;
+  int unaryPlus = 0, unaryMinus = 0;
+  int len = (int)strlen(str);
+  for (int i = 0; i < len && status == OK; i++) {
+    status = getNumber(str, stack, &i, &unaryMinus, &unaryPlus);
+    if (status == OK) {
+      setZeroPriority(str, stack, i);
+      setFirstPriority(str, stack, i, &unaryMinus, &unaryPlus);
+      setSecondPriority(str, stack, &i);
+      setThirdPriority(str, stack, i);
+      setFourthPriority(str, stack, &i);
+    }
+  }
+  return status;
+}
+
+int getNumber(char* str, Stack* stack, int* i, int* unaryMinus,
+              int* unaryPlus) {
+  char buffer[256] = {0};
+  int status = OK;
+  double num = 0;
+  if (isdigit(str[*i])) {
+    int dot_count = 0;
+    int buffer_index = 0;
+    while ((isdigit(str[*i])) || (str[*i] == '.')) {
+      if (str[*i] == '.') {
+        dot_count++;
+      }
+      if (dot_count <= 1) {
+        buffer[buffer_index++] = str[(*i)++];
+      }
+    }
+    num = atof(buffer);
+    if (*unaryMinus == 1) {
+      num *= -1;
+    }
+    Lexeme tmpLexeme = {num, NUM, 0};
+    status = push(stack, tmpLexeme);
+  }
+  *unaryMinus = 0;
+  *unaryPlus = 0;
+  return status;
+}
+
+int reverseStack(Stack* inputStack, Stack* reversedStack) {
+  int status = OK;
+  while (inputStack->top != NULL) {
+    status = push(reversedStack, inputStack->top->lexeme);
+    pop(inputStack);
+  }
+  return status;
+}
+
+int getPostfix(Stack* infix, Stack* buffer, Stack* postfix) {
+  int status = OK;
+  while (infix->top != NULL && status == OK) {
+    if (infix->top->lexeme.type == NUM || infix->top->lexeme.type == X) {
+      status = push(postfix, infix->top->lexeme);
+    } else if (infix->top->lexeme.priority == 4 ||
+               infix->top->lexeme.type == LEFT_BRACKET) {
+      status = push(buffer, infix->top->lexeme);
+    } else if (infix->top->lexeme.type == RIGHT_BRACKET) {
+      while (buffer->top != NULL && buffer->top->lexeme.type != LEFT_BRACKET) {
+        status = push(postfix, buffer->top->lexeme);
+        pop(buffer);
+      }
+      if (buffer->top != NULL) {
+        pop(buffer);
+      }
+    } else if (buffer->top == NULL ||
+               (infix->top->lexeme.priority > buffer->top->lexeme.priority)) {
+      status = push(buffer, infix->top->lexeme);
+    } else if ((buffer->top != NULL) &&
+               (infix->top->lexeme.priority <= buffer->top->lexeme.priority) &&
+               infix->top->lexeme.type != RIGHT_BRACKET) {
+      if (buffer->top->lexeme.priority == 3 &&
+          infix->top->lexeme.priority == 3) {
+        status = push(buffer, infix->top->lexeme);
+      } else {
+        while ((buffer->top != NULL) &&
+               (infix->top->lexeme.priority <= buffer->top->lexeme.priority)) {
+          status = push(postfix, buffer->top->lexeme);
+          pop(buffer);
+        }
+        status = push(buffer, infix->top->lexeme);
+      }
+    }
+    pop(infix);
+  }
+
+  if (infix->top == NULL && buffer->top != NULL) {
+    while (buffer->top != NULL) {
+      status = push(postfix, buffer->top->lexeme);
+      pop(buffer);
+    }
+  }
+  return status;
+}
+
+int calculateResult(Stack* rpn, double x, double* result) {
+  int status = OK;
 
   Stack buffer;
   initStack(&buffer);
 
-  if (validateStr(str) == OK && 0 < strlen(str) && strlen(str) <= 255) {
-    if (inputStrToStack(str, &infix)) {
-      reverseForRpn(&infix, &reversed);
-      infixToPostfix(&reversed, &buffer, &infix);
-      reverseForRpn(&infix, &reversed);
-      *result = calculateResult(&reversed, x);
-    } else {
-      status = ERROR;
-      *result = 0;
-    }
-  } else {
-    status = ERROR;
-    *result = 0;
-  }
-  if (isnan(*result)) {
-    *result = 0;
-    status = ERROR;
-  }
-  if (isinf(*result)) {
-    *result = 0;
-    status = ERROR;
-  }
-  return status;
-}
-
-int inputStrToStack(char* str, Stack* stack) {
-  char buffer[260] = {0};
-  int strLength = (int)strlen(str);
-  int status = OK;
-  int minusSign = 0;
-  int plusSign = 0;
-  for (int i = 0; i < strLength && status == OK; i++) {
-    if (getNumber(str, stack, buffer, &i, &minusSign, &plusSign) == ERROR) {
-      status = ERROR;
-    } else {
-      processZeroPriority(str, stack, i);
-      processFirstPriority(str, stack, i, &minusSign, &plusSign);
-      processSecondPriority(str, stack, &i);
-      processThirdPriority(str, stack, i);
-      processFourthPriority(str, stack, &i);
-    }
-  }
-  return status;
-}
-
-int getNumber(char* str, Stack* stack, char* buffer, int* i, int* minusSign, int* plusSign) {
-  int status = OK;
-  double num = 0;
-  if (isdigit(str[*i])) {
-
-    int temp = *i;
-    int x = 0;
-    while ((isdigit(str[temp])) || (str[temp] == '.')) {
-      buffer[x] = str[temp];
-      x++;
-      temp++;
-    }
-    *i = temp - 1;
-    if (strlen(buffer) > 1 && buffer[0] == '0' && buffer[1] != '.') {
-      status = ERROR;
-    } else {
-      num = atof(buffer);
-      if (*minusSign == 1) {
-        num *= -1;
-      }
-      status = push(stack, num, NUM, 0);
-      memset(buffer, '\0', (size_t)sizeof(buffer));
-    }
-  }
-  *minusSign = 0;
-  *plusSign = 0;
-  return status;
-}
-
-int reverseForRpn(Stack* inputStack, Stack* reversedStack) {
-	int status = OK;
-  while (inputStack->top != NULL) {
-    double data = inputStack->top->data;
-    int type = inputStack->top->type;
-    int priority = inputStack->top->priority;
-    status = push(reversedStack, data, type, priority);
-    pop(inputStack);
-  }
-	return status;
-}
-
-void infixToPostfix(Stack* infixStack, Stack* bufferStack, Stack* postfixStack) {
-	int status = OK;
-  while (infixStack->top != NULL && status == OK) {
-    if (infixStack->top->type == NUM || infixStack->top->type == X) {
-      status = push(postfixStack, infixStack->top->data, infixStack->top->type, infixStack->top->priority);
-    } else if (infixStack->top->priority == 4 || infixStack->top->type == L_BRACKET) {
-      status = push(bufferStack, infixStack->top->data, infixStack->top->type, infixStack->top->priority);
-    } else if (infixStack->top->type == R_BRACKET) {
-      while (bufferStack->top != NULL && bufferStack->top->type != L_BRACKET) {
-        status = push(postfixStack, bufferStack->top->data, bufferStack->top->type, bufferStack->top->priority);
-        pop(bufferStack);
-      }
-      if (bufferStack->top != NULL) {
-        pop(bufferStack);
-      }
-    } else if (bufferStack->top == NULL || (infixStack->top->priority > bufferStack->top->priority)) {
-      status = push(bufferStack, infixStack->top->data, infixStack->top->type, infixStack->top->priority);
-    } else if ((bufferStack->top != NULL) && (infixStack->top->priority <= bufferStack->top->priority) && infixStack->top->type != R_BRACKET) {
-      if (bufferStack->top->priority == 3 && infixStack->top->priority == 3) {
-        status = push(bufferStack, infixStack->top->data, infixStack->top->type, infixStack->top->priority);
+  while (rpn->top != NULL && status == OK) {
+    if (rpn->top->lexeme.type == NUM || rpn->top->lexeme.type == X) {
+      if (rpn->top->lexeme.type == X) {
+        Lexeme tmpLexeme = {x, NUM, 0};
+        status = push(&buffer, tmpLexeme);
       } else {
-        while ((bufferStack->top != NULL) && (infixStack->top->priority <= bufferStack->top->priority)) {
-          status = push(postfixStack, bufferStack->top->data, bufferStack->top->type, bufferStack->top->priority);
-          pop(bufferStack);
-        }
-        status = push(bufferStack, infixStack->top->data, infixStack->top->type, infixStack->top->priority);
+        status = push(&buffer, rpn->top->lexeme);
       }
-    }
-    pop(infixStack);
-  }
-
-  if (infixStack->top == NULL && bufferStack->top != NULL) {
-    while (bufferStack->top != NULL) {
-      status = push(postfixStack, bufferStack->top->data, bufferStack->top->type, bufferStack->top->priority);
-      pop(bufferStack);
-    }
-  }
-}
-
-
-double calculateResult(Stack* inputRpnStack, double x) {
-  double res_value = 0;
-	int status = OK;
-
-  Stack bufferStack;
-  initStack(&bufferStack);
-
-  while (inputRpnStack->top != NULL && status == OK) {
-    if (inputRpnStack->top->type == NUM || inputRpnStack->top->type == X) {
-      if (inputRpnStack->top->type == X) {
-        status = push(&bufferStack, x, X, inputRpnStack->top->priority);
-      } else {
-        status = push(&bufferStack, inputRpnStack->top->data, inputRpnStack->top->type, inputRpnStack->top->priority);
-      }
-      pop(inputRpnStack);
-    } else if (inputRpnStack->top->type != NUM) {
+      pop(rpn);
+    } else if (rpn->top->lexeme.type != NUM) {
       double result = 0;
-      if (inputRpnStack->top->priority == 4) {
-        if (inputRpnStack->top->type == SIN)  result = sin(bufferStack.top->data);
-        if (inputRpnStack->top->type == ASIN) result = asin(bufferStack.top->data);
-        if (inputRpnStack->top->type == COS)  result = cos(bufferStack.top->data);
-        if (inputRpnStack->top->type == ACOS) result = acos(bufferStack.top->data);
-        if (inputRpnStack->top->type == TAN)  result = tan(bufferStack.top->data);
-        if (inputRpnStack->top->type == ATAN) result = atan(bufferStack.top->data);
-        if (inputRpnStack->top->type == SQRT) result = sqrt(bufferStack.top->data);
-        if (inputRpnStack->top->type == LOG)  result = log10(bufferStack.top->data);
-        if (inputRpnStack->top->type == LN)   result = log(bufferStack.top->data);
-        pop(&bufferStack);
-        pop(inputRpnStack);
-        status = push(&bufferStack, result, NUM, 0);
+      if (rpn->top->lexeme.priority == 4) {
+        Lexeme operation = rpn->top->lexeme;
+        Lexeme number = buffer.top->lexeme;
+        result = calculateTrig(&operation, &number);
+        pop(&buffer);
+        pop(rpn);
+        Lexeme tmpLexeme = {result, NUM, 0};
+        status = push(&buffer, tmpLexeme);
       } else {
-        double firstLexeme = pop(&bufferStack);
-        double secondLexeme = pop(&bufferStack);
-        if (inputRpnStack->top->type == PLUS)  result = secondLexeme + firstLexeme;
-        if (inputRpnStack->top->type == MINUS) result = secondLexeme - firstLexeme;
-        if (inputRpnStack->top->type == MULT)  result = secondLexeme * firstLexeme;
-        if (inputRpnStack->top->type == DIV)   result = secondLexeme / firstLexeme;
-        if (inputRpnStack->top->type == MOD)   result = fmod(secondLexeme, firstLexeme);
-        if (inputRpnStack->top->type == EXP)   result = pow(secondLexeme, firstLexeme);
-        pop(inputRpnStack);
-        push(&bufferStack, result, NUM, 0);
+        Lexeme operation = rpn->top->lexeme;
+        double firstNumber = pop(&buffer);
+        double secondNumber = pop(&buffer);
+        result =
+            calculateSimpleOperation(&operation, firstNumber, secondNumber);
+        pop(rpn);
+        Lexeme tmpLexeme = {result, NUM, 0};
+        push(&buffer, tmpLexeme);
       }
     }
   }
-  res_value = bufferStack.top->data;
-  pop(&bufferStack);
-  return res_value;
+  *result = buffer.top->lexeme.value;
+  pop(&buffer);
+  return status;
+}
+
+double calculateTrig(Lexeme* operation, Lexeme* number) {
+  double result = 0;
+  if (operation->type == SIN) result = sin(number->value);
+  if (operation->type == ASIN) result = asin(number->value);
+  if (operation->type == COS) result = cos(number->value);
+  if (operation->type == ACOS) result = acos(number->value);
+  if (operation->type == TAN) result = tan(number->value);
+  if (operation->type == ATAN) result = atan(number->value);
+  if (operation->type == SQRT) result = sqrt(number->value);
+  if (operation->type == LOG) result = log10(number->value);
+  if (operation->type == LN) result = log(number->value);
+  return result;
+}
+
+double calculateSimpleOperation(Lexeme* operation, double firstNumber,
+                                double secondNumber) {
+  double result = 0;
+  if (operation->type == PLUS) result = firstNumber + secondNumber;
+  if (operation->type == MINUS) result = secondNumber - firstNumber;
+  if (operation->type == MULT) result = firstNumber * secondNumber;
+  if (operation->type == DIV) result = secondNumber / firstNumber;
+  if (operation->type == MOD) result = fmod(secondNumber, firstNumber);
+  if (operation->type == EXP) result = pow(secondNumber, firstNumber);
+  return result;
 }

@@ -16,10 +16,11 @@ public:
     ~MainWindow();
 
 private slots:
-    void numbers();
+    void pushButton();
     void pushButtonAC();
     void pushButtonCE();
-    void arithmeticsOperations();
+    void pushBUttonTrig();
+//    void pushButton_EQ();
 
 private:
     Ui::MainWindow *ui;

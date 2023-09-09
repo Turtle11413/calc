@@ -2,13 +2,11 @@
 
 void initStack(Stack* stack) { stack->top = NULL; }
 
-int push(Stack* list, double data, int type, int priority) {
+int push(Stack* list, Lexeme addLexeme) {
   int status = OK;
   Node* newNode = malloc(sizeof(Node));
   if (newNode != NULL) {
-    newNode->data = data;
-    newNode->type = type;
-    newNode->priority = priority;
+    newNode->lexeme = addLexeme;
     newNode->next = list->top;
     list->top = newNode;
   } else {
@@ -18,12 +16,12 @@ int push(Stack* list, double data, int type, int priority) {
 }
 
 double pop(Stack* stack) {
-  if (stack->top == NULL) {
-    return 0;
+  double rtn = 0.;
+  if (stack->top != NULL) {
+    rtn = stack->top->lexeme.value;
+    Node* temp = stack->top;
+    stack->top = stack->top->next;
+    free(temp);
   }
-  double data = stack->top->data;
-  Node* temp = stack->top;
-  stack->top = stack->top->next;
-  free(temp);
-  return data;
+  return rtn;
 }
