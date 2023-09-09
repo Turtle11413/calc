@@ -2,8 +2,8 @@
 
 int main() {
 
-  char *str = "2 / (3 + 2) * 5";
-  double cur = 2 / (3 + 2) * 5;
+  char *str = "sqrt(1)";
+  double cur = sqrt(1);
   double res = 0;
   int err = processing(str, &res, 0);
   printf("res = %.10f\n", res);
