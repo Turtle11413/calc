@@ -1,6 +1,7 @@
 #include <check.h>
 
 #include "backend/calc.h"
+#include "backend/credit.h"
 
 START_TEST(smartCalc_test_1) {
   double res = 0.0;
@@ -337,6 +338,36 @@ START_TEST(smartCalc_test_32) {
 }
 END_TEST
 
+START_TEST(smartCalc_test_credit_1) {
+  double loan = 500000;
+  int period = 10;
+  double rate = 7.9;
+  double monthly_payment = 0;
+  double overpayment = 0;
+  double total = 0;
+  annuity_loan(loan, period, rate, &monthly_payment, &overpayment, &total);
+  ck_assert_double_eq_tol(monthly_payment, 51828.23, 1e-2);
+  ck_assert_double_eq_tol(overpayment, 18282.35, 1e-2);
+  ck_assert_double_eq_tol(total, 518282.35, 1e-2);
+}
+END_TEST
+
+START_TEST(smartCalc_test_credit_2) {
+  double loan = 500000;
+  int period = 10;
+  double rate = 7.9;
+  double first_payment = 0;
+  double last_payment = 0;
+  double overpayment = 0;
+  double total = 0;
+  diff_loan(loan, period, rate, &first_payment, &last_payment, &overpayment, &total);
+  ck_assert_double_eq_tol(first_payment, 53291.67, 1e-2);
+  ck_assert_double_eq_tol(last_payment, 50329.17, 1e-2);
+  ck_assert_double_eq_tol(overpayment, 18104.17, 1e-2);
+  ck_assert_double_eq_tol(total, 518104.17, 1e-2);
+}
+END_TEST
+
 Suite *s21_SmartCalc_suite() {
   Suite *s;
 
@@ -375,6 +406,8 @@ Suite *s21_SmartCalc_suite() {
   tcase_add_test(tc, smartCalc_test_30);
   tcase_add_test(tc, smartCalc_test_31);
   tcase_add_test(tc, smartCalc_test_32);
+  tcase_add_test(tc, smartCalc_test_credit_1);
+  tcase_add_test(tc, smartCalc_test_credit_2);
 
   suite_add_tcase(s, tc);
 
