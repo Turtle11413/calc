@@ -3,7 +3,7 @@
 int main() {
 
   char *str = "sqrt(1)";
-  double cur = 0;
+  double cur = sqrt(1);
   double res = 0;
   int err = from_answer(str, &res, 0);
   printf("res = %.10f\n", res);

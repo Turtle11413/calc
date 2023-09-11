@@ -129,8 +129,7 @@ int validateTrig(char* str) {
   int len = (int)strlen(str);
   for (int i = 0; i < len && status == OK; i++) {
     // sin cos tan
-    if (str[i] == 'c' || (str[i] == 't' && str[i + 1] == 'a') ||
-        (str[i] == 's' && str[i + 1] == 'i')) {
+    if (str[i] == 'c' || (str[i] == 't' && str[i-1] != 'r') || (str[i] == 's' && str[i + 1] == 'i')) {
       if (i > len - 6) {
         status = INCORRECT_INPUT;
       }

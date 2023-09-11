@@ -8,6 +8,7 @@ int from_answer(char* str, double* result, double x) {
   Stack buffer;
 
   status = validateStr(str);
+	
   if (status == OK) {
     initStack(&infix);
     status = parseToStack(str, &infix);
