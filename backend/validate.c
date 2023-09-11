@@ -129,7 +129,8 @@ int validateTrig(char* str) {
   int len = (int)strlen(str);
   for (int i = 0; i < len && status == OK; i++) {
     // sin cos tan
-    if (str[i] == 'c' || (str[i] == 't' && str[i-1] != 'r') || (str[i] == 's' && str[i + 1] == 'i')) {
+    if (str[i] == 'c' || (str[i] == 't' && str[i - 1] != 'r') ||
+        (str[i] == 's' && str[i + 1] == 'i')) {
       if (i > len - 6) {
         status = INCORRECT_INPUT;
       }
@@ -206,8 +207,7 @@ int validateX(char* str) {
       if (i == 0 && (isdigit(str[i + 1]) || strchr(")x", str[i + 1]))) {
         status = INCORRECT_INPUT;
       }
-      if (i == len - 1 &&
-          (isdigit(str[i - 1]) || strchr(")x", str[i - 1]))) {
+      if (i == len - 1 && (isdigit(str[i - 1]) || strchr(")x", str[i - 1]))) {
         status = INCORRECT_INPUT;
       }
       if (i > 0 && i < len - 1 &&

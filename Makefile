@@ -3,6 +3,7 @@ FLAGS = -Wall -Werror -Wextra
 GCOV = -fprofile-arcs -ftest-coverage
 SRC=$(wildcard ./backend/*.c)
 OBJ=$(patsubst %.c,%.o,$(SRC))
+INSTALL_DIR=/usr/local/bin
 OS:=$(shell uname)
 
 clang:
@@ -11,29 +12,14 @@ clang:
 calc.a: ${OBJ}
 	ar rcs calc.a $^
 
-build_main: calc.a
-	$(CC) $(FLAGS) -lm main.c -L. calc.a -o main.out
-
-main: build_main
-	./main.out
-
-valgrind_main: build_main
-	valgrind --tool=memcheck --leak-check=yes ./main.out
-
-valgrind_test: build_test
-	valgrind --tool=memcheck --leak-check=yes ./test.out
-
-leaks_main: build_main
-	leaks -atExit -- ./main.out
-
-leaks_test: build_test
-	leaks -atExit -- ./test.out
-
 build_test:
 	$(CC) $(FLAGS) -lm -lcheck test.c backend/*.c -o test.out
 
 test: build_test
 	./test.out
+
+leaks_test: build_test
+	leaks -atExit -- ./test.out
 
 gcov_report:
 	$(CC) $(GCOV) test.c backend/*.c -o test.out -lcheck

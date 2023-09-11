@@ -7,7 +7,6 @@ extern "C" {
 
 #endif
 
-
 #include <ctype.h>
 #include <math.h>
 #include <stdio.h>
@@ -105,10 +104,8 @@ int from_answer(char* str, double* result, double x);
 //-------------------------------------------------------
 
 #ifdef __cplusplus
-
 }
 
 #endif
-
 
 #endif

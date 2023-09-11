@@ -4,31 +4,30 @@
 #include <QWidget>
 
 extern "C" {
-    #include <../github/calc/src/backend/credit.h>
+#include <../github/calc/src/backend/credit.h>
 }
 
 namespace Ui {
 class Cred;
 }
 
-class Cred : public QWidget
-{
-    Q_OBJECT
+class Cred : public QWidget {
+  Q_OBJECT
 
-public:
-    explicit Cred(QWidget *parent = nullptr);
-    ~Cred();
+ public:
+  explicit Cred(QWidget *parent = nullptr);
+  ~Cred();
 
-signals:
-    void firstWindow();
+ signals:
+  void firstWindow();
 
-private slots:
+ private slots:
 
-    void on_pushButton_calculator_clicked();
-    void on_pushButton_clicked();
+  void on_pushButton_calculator_clicked();
+  void on_pushButton_clicked();
 
-private:
-    Ui::Cred *ui;
+ private:
+  Ui::Cred *ui;
 };
 
-#endif // CRED_H
+#endif  // CRED_H
