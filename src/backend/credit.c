@@ -23,23 +23,3 @@ void diff_loan(double loan, int period, double annual_perc, double* first_paymen
   *total = (monthly_perc * loan * (period + 1) / 2) + loan;
   *overpayment = *total - loan;
 }
-
-void calculate(double loan, int period, double annual_perc, int mod) {
-  double overpayment = 0;
-  double total = 0;
-  if (mod == 0) {
-    double monthly_payment = 0;
-    annuity_loan(loan, period, annual_perc, &monthly_payment, &overpayment, &total);
-    printf("monthly = %f\n", monthly_payment);
-    printf("overpay = %f\n", overpayment);
-    printf("total = %f\n", total);
-  }
-  else if (mod == 1) {
-    double first_payment = 0;
-    double last_payment = 0;
-    diff_loan(loan, period, annual_perc, &first_payment, &last_payment, &overpayment, &total);
-    printf("monthly = %f ... %f\n", first_payment, last_payment);
-    printf("overpay = %f\n", overpayment);
-    printf("total = %f\n", total);
-  }
-}
