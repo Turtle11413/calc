@@ -4,25 +4,26 @@
 #include <QMainWindow>
 
 QT_BEGIN_NAMESPACE
-namespace Ui { class MainWindow; }
+namespace Ui {
+class MainWindow;
+}
 QT_END_NAMESPACE
 
-class MainWindow : public QMainWindow
-{
-    Q_OBJECT
+class MainWindow : public QMainWindow {
+  Q_OBJECT
 
-public:
-    MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
+ public:
+  MainWindow(QWidget *parent = nullptr);
+  ~MainWindow();
 
-private slots:
-    void pushButton();
-    void pushButtonAC();
-    void pushButtonCE();
-    void pushBUttonTrig();
-//    void pushButton_EQ();
+ private slots:
+  void pushButton();
+  void pushButtonAC();
+  void pushButtonCE();
+  void pushBUttonTrig();
+  //    void pushButton_EQ();
 
-private:
-    Ui::MainWindow *ui;
+ private:
+  Ui::MainWindow *ui;
 };
-#endif // MAINWINDOW_H
+#endif  // MAINWINDOW_H

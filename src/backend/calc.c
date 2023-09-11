@@ -139,10 +139,8 @@ int getPostfix(Stack* infix, Stack* buffer, Stack* postfix) {
 
 int calculateResult(Stack* rpn, double x, double* result) {
   int status = OK;
-
   Stack buffer;
   initStack(&buffer);
-
   while (rpn->top != NULL && status == OK) {
     if (rpn->top->lexeme.type == NUM || rpn->top->lexeme.type == X) {
       if (rpn->top->lexeme.type == X) {

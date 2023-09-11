@@ -40,13 +40,13 @@ int validateBrackets(char* str) {
 }
 
 int validateBracketsPosition(char* str) {
-  int strLength = strlen(str);
+  int len = strlen(str);
   int status = OK;
   for (int i = 0; str[i] != '\0'; i++) {
     if (i == 0 && str[i] == ')') {
       status = INCORRECT_INPUT;
     }
-    if (i == strLength - 1 && str[i] == '(') {
+    if (i == len - 1 && str[i] == '(') {
       status = INCORRECT_INPUT;
     }
     if (str[i] == '(' && i != 0) {
@@ -91,11 +91,11 @@ int validateDots(char* str) {
 
 int validateOperators(char* str) {
   int status = OK;
-  int strLength = (int)strlen(str);
-  for (int i = 0; i < strLength && status == OK; i++) {
+  int len = (int)strlen(str);
+  for (int i = 0; i < len && status == OK; i++) {
     if (strchr("+-", str[i])) {
-      if (i == strLength - 1) status = INCORRECT_INPUT;
-      if (i != 0 && i != strLength - 1) {
+      if (i == len - 1) status = INCORRECT_INPUT;
+      if (i != 0 && i != len - 1) {
         if (i > 0 &&
             (strchr(")/*^", str[i + 1]) || strchr("/*^+-", str[i - 1])))
           status = INCORRECT_INPUT;
@@ -103,16 +103,16 @@ int validateOperators(char* str) {
     }
 
     if (strchr("/*^", str[i])) {
-      if (i == 0 || i == strLength - 1) status = INCORRECT_INPUT;
-      if (i != 0 && i != strLength - 1) {
+      if (i == 0 || i == len - 1) status = INCORRECT_INPUT;
+      if (i != 0 && i != len - 1) {
         if (i > 0 &&
             (strchr(")/*^", str[i + 1]) || strchr("/*^+-", str[i - 1])))
           status = INCORRECT_INPUT;
       }
     }
     if (str[i] == 'm') {
-      if (i == 0 || i > strLength - 4) status = INCORRECT_INPUT;
-      if (i != 0 || i < strLength - 4) {
+      if (i == 0 || i > len - 4) status = INCORRECT_INPUT;
+      if (i != 0 || i < len - 4) {
         if (i > 0 && !isdigit(str[i - 1]) && (strchr(")x", str[i - 1]) == NULL))
           status = INCORRECT_INPUT;
         if (i > 0 && !isdigit(str[i + 3]) && (strchr("(x", str[i + 3]) == NULL))
@@ -126,15 +126,15 @@ int validateOperators(char* str) {
 
 int validateTrig(char* str) {
   int status = OK;
-  int strLength = (int)strlen(str);
-  for (int i = 0; i < strLength && status == OK; i++) {
+  int len = (int)strlen(str);
+  for (int i = 0; i < len && status == OK; i++) {
     // sin cos tan
-    if (str[i] == 'c' || str[i] == 't' ||
+    if (str[i] == 'c' || (str[i] == 't' && str[i + 1] == 'a') ||
         (str[i] == 's' && str[i + 1] == 'i')) {
-      if (i > strLength - 6) {
+      if (i > len - 6) {
         status = INCORRECT_INPUT;
       }
-      if (i != 0 || i < strLength - 6) {
+      if (i != 0 || i < len - 6) {
         if (i > 0 && (strchr(")x", str[i - 1]) || isdigit(str[i - 1])))
           status = INCORRECT_INPUT;
       }
@@ -142,10 +142,10 @@ int validateTrig(char* str) {
     }
     //  asin acos atan
     if (str[i] == 'a') {
-      if (i > strLength - 7) {
+      if (i > len - 7) {
         status = INCORRECT_INPUT;
       }
-      if (i != 0 || i < strLength - 7) {
+      if (i != 0 || i < len - 7) {
         if (i > 0 && (strchr(")x", str[i - 1]) || isdigit(str[i - 1])))
           status = INCORRECT_INPUT;
       }
@@ -157,14 +157,14 @@ int validateTrig(char* str) {
 
 int validateOtherFuncs(char* str) {
   int status = OK;
-  int strLength = (int)strlen(str);
+  int len = (int)strlen(str);
   // ln
-  for (int i = 0; i < strLength && status == OK; i++) {
+  for (int i = 0; i < len && status == OK; i++) {
     if (str[i] == 'l' && str[i + 1] == 'n') {
-      if (i > strLength - 5) {
+      if (i > len - 5) {
         status = INCORRECT_INPUT;
       }
-      if (i != 0 || i < strLength - 5) {
+      if (i != 0 || i < len - 5) {
         if (i > 0 && (strchr(")x", str[i - 1]) || isdigit(str[i - 1])))
           status = INCORRECT_INPUT;
       }
@@ -172,10 +172,10 @@ int validateOtherFuncs(char* str) {
     }
     // sqrt
     if (str[i] == 's' && str[i + 1] == 'q') {
-      if (i > strLength - 7) {
+      if (i > len - 6) {
         status = INCORRECT_INPUT;
       }
-      if (i != 0 || i < strLength - 7) {
+      if (i != 0 || i < len - 7) {
         if (i > 0 && (strchr(")x", str[i - 1]) || isdigit(str[i - 1])))
           status = INCORRECT_INPUT;
       }
@@ -186,10 +186,10 @@ int validateOtherFuncs(char* str) {
     }
     // log
     if (str[i] == 'l' && str[i + 1] == 'o') {
-      if (i > strLength - 6) {
+      if (i > len - 6) {
         status = INCORRECT_INPUT;
       }
-      if (i != 0 || i < strLength - 6) {
+      if (i != 0 || i < len - 6) {
         if (i > 0 && (strchr(")x", str[i - 1]) || isdigit(str[i - 1])))
           status = INCORRECT_INPUT;
       }
@@ -201,21 +201,21 @@ int validateOtherFuncs(char* str) {
 
 int validateX(char* str) {
   int status = OK;
-  int strLength = (int)strlen(str);
-  for (int i = 0; i < strLength && status == OK; i++) {
-    if (str[i] == 'x') {
+  int len = (int)strlen(str);
+  for (int i = 0; i < len && status == OK; i++) {
+    if (str[i] == 'x' && len != 1) {
       if (i == 0 && (isdigit(str[i + 1]) || strchr(")x", str[i + 1]))) {
         status = INCORRECT_INPUT;
       }
-      if (i == strLength - 1 &&
+      if (i == len - 1 &&
           (isdigit(str[i - 1]) || strchr(")x", str[i - 1]))) {
         status = INCORRECT_INPUT;
       }
-      if (i > 0 && i < strLength - 1 &&
+      if (i > 0 && i < len - 1 &&
           (isdigit(str[i + 1]) || str[i + 1] == '(' || str[i + 1] == 'x')) {
         status = INCORRECT_INPUT;
       }
-      if (i > 0 && i < strLength - 1 &&
+      if (i > 0 && i < len - 1 &&
           (isdigit(str[i - 1]) || str[i - 1] == ')' || str[i - 1] == 'x')) {
         status = INCORRECT_INPUT;
       }

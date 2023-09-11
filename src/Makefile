@@ -1,13 +1,18 @@
 CC = gcc
 FLAGS = -Wall -Werror -Wextra
 GCOV = -fprofile-arcs -ftest-coverage
+SRC=$(wildcard ./backend/*.c)
+OBJ=$(patsubst %.c,%.o,$(SRC))
 OS:=$(shell uname)
 
 clang:
 	clang-format --style=Google -i */*.c */*/*.c */*.h */*/*.h */*.cpp
 
-build_main:
-	$(CC) $(FLAGS) -lm main.c backend/*.c -o main.out
+calc.a: ${OBJ}
+	ar rcs calc.a $^
+
+build_main: calc.a
+	$(CC) $(FLAGS) -lm main.c -L. calc.a -o main.out
 
 main: build_main
 	./main.out
@@ -30,7 +35,6 @@ build_test:
 test: build_test
 	./test.out
 
-
 gcov_report:
 	$(CC) $(GCOV) test.c backend/*.c -o test.out -lcheck
 	./test.out
@@ -40,6 +44,7 @@ gcov_report:
 
 clean:
 	rm -rf *.o
+	rm -rf backend/*.o
 	rm -rf *.a
 	rm -rf *.out
 	rm -rf *.gcno

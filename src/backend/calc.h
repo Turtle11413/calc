@@ -1,6 +1,13 @@
 #ifndef SRC_CALC_H
 #define SRC_CALC_H
 
+#ifdef __cplusplus
+
+extern "C" {
+
+#endif
+
+
 #include <ctype.h>
 #include <math.h>
 #include <stdio.h>
@@ -55,6 +62,8 @@ typedef struct Stack {
 void initStack(Stack* stack);
 int push(Stack* stack, Lexeme addLexeme);
 double pop(Stack* stack);
+int isEmpty(Stack* stack);
+void destroyStack(Stack* stack);
 // -----------------------------------------------------
 
 // -------------------- validate string ----------------
@@ -94,5 +103,12 @@ double calculateSimpleOperation(Lexeme* operation, double firstNumber,
 //-------------------------------------------------------
 int from_answer(char* str, double* result, double x);
 //-------------------------------------------------------
+
+#ifdef __cplusplus
+
+}
+
+#endif
+
 
 #endif
