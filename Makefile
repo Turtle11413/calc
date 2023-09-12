@@ -2,44 +2,70 @@ CC = gcc
 FLAGS = -Wall -Werror -Wextra
 GCOV = -fprofile-arcs -ftest-coverage
 SRC=$(wildcard ./backend/*.c)
+SRC_TEST=test.c
 OBJ=$(patsubst %.c,%.o,$(SRC))
 INSTALL_DIR=/usr/local/bin
+TARGET=calc
 OS:=$(shell uname)
+ifeq ($(OS),Linux)
+  	OPEN_CMD = xdg-open
+	ADD_LIB = -lcheck -lsubunit -lm -lrt -lpthread -D_GNU_SOURCE
+endif
 
-clang:
-	clang-format --style=Google -i */*.c */*/*.c */*.h */*/*.h */*.cpp
+ifeq ($(OS),Darwin)
+	OPEN_CMD = open
+	ADD_LIB = -lcheck -lm
+endif
+
+all: install
 
 calc.a: ${OBJ}
-	ar rcs calc.a $^
+	@ar rcs calc.a $^
+	@ranlib calc.a
 
-build_test:
-	$(CC) $(FLAGS) -lm -lcheck test.c backend/*.c -o test.out
+install:
+	@mkdir build/
+	@mkdir calculator/
+	@cd build/ && qmake ../frontend/calc.pro && make
+	@cp -rf build/calc.app calculator
+	@make clean
 
-test: build_test
-	./test.out
+start: install
+ifeq ($(OS), Darwin)
+	cd calculator/$(TARGET).app/Contents/MacOS && ./$(TARGET)
+else
+	cd build/ && ./$(TARGET)
+endif
 
-leaks_test: build_test
-	leaks -atExit -- ./test.out
+uninstall:
+	rm -rf calculator
+
+dvi:
+	@$(OPEN_CMD) dvi.md
+
+dist:
+	@mkdir dist
+	@cp -R frontend/ backend/ dvi.md Makefile dist
+	@cd dist && tar cvzf smartCalc_v1.0.tgz *
+	@cd dist && rm -rf frontend/ backend/ test dvi.md Makefile
+	@rm -rf calculator
+
+test:
+	@$(CC) $(FLAGS) $(SRC) $(SRC_TEST) -o test.out $(ADD_LIB)
+	@./test.out
 
 gcov_report:
-	$(CC) $(GCOV) test.c backend/*.c -o test.out -lcheck
-	./test.out
-	lcov -t "test" -o test.info -c -d ./
-	genhtml test.info -o report
-	open report/index.html
+	@$(CC) $(GCOV) $(SRC) $(SRC_TEST) -o test.out $(ADD_LIB)
+	@./test.out
+	@lcov -t "test" -o test.info -c -d ./
+	@genhtml test.info -o report
+	@$(OPEN_CMD) report/index.html
 
 clean:
-	rm -rf *.o
-	rm -rf backend/*.o
-	rm -rf *.a
-	rm -rf *.out
-	rm -rf *.gcno
-	rm -rf *.gcda
-	rm -rf *.info
-	rm -rf *.gch
-	rm -rf test.dSYM 
-	rm -rf report 
-	rm -rf gcov_report 
-	rm -rf build
-	rm -rf logs
+	@rm -rf *.o backend/*.o *.a *.out *.gcno *.gcda *.info *.gch test.dSYM report gcov_report build* logs
 
+clang:
+	@clang-format --style=Google -i */*.c */*.h */*.cpp
+
+check_style:
+	@clang-format --style=Google -n */*.c */*.h */*.cpp

@@ -4,7 +4,7 @@
 #include <QWidget>
 
 extern "C" {
-#include <../github/calc/src/backend/credit.h>
+#include <../backend/credit.h>
 }
 
 namespace Ui {

@@ -6,8 +6,8 @@
 #include <QMainWindow>
 
 extern "C" {
-#include <../github/calc/src/backend/calc.h>
-#include <../github/calc/src/backend/credit.h>
+#include <../backend/calc.h>
+#include <../backend/credit.h>
 }
 
 QT_BEGIN_NAMESPACE

@@ -13,18 +13,18 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     qcustomplot.cpp \
-    ../github/calc/src/backend/calc.c \
-    ../github/calc/src/backend/stack.c \
-    ../github/calc/src/backend/validate.c \
-    ../github/calc/src/backend/priority.c \
-    ../github/calc/src/backend/credit.c
+    ../backend/calc.c \
+    ../backend/stack.c \
+    ../backend/validate.c \
+    ../backend/priority.c \
+    ../backend/credit.c
 
 HEADERS += \
     cred.h \
     mainwindow.h \
     qcustomplot.h \
-    ../github/calc/src/backend/calc.h \
-    ../github/calc/src/backend/credit.h
+    ../backend/calc.h \
+    ../backend/credit.h
 
 FORMS += \
     cred.ui \

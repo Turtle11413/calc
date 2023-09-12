@@ -1,5 +1,7 @@
 #include "mainwindow.h"
 
+#include <QVector>
+
 #include "ui_mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent)
@@ -47,6 +49,9 @@ MainWindow::MainWindow(QWidget *parent)
 
   credit = new Cred;
   connect(credit, &Cred::firstWindow, this, &MainWindow::show);
+
+  ui->customPlot->xAxis->setRange(-100, 100);
+  ui->customPlot->yAxis->setRange(-100, 100);
 }
 
 MainWindow::~MainWindow() { delete ui; }
@@ -109,15 +114,17 @@ void MainWindow::on_pushButton_graph_clicked() {
   ui->customPlot->addGraph();
   ui->customPlot->graph(0)->setPen(QPen(Qt::black));
 
-  const int SIZE = 2500;
-  QVector<double> x(SIZE), y(SIZE);
-  double xBegin = -SIZE / 2;
+  QVector<double> x, y;
+  double xBegin = -1000;
+  double yCur = 0;
+  double xCur = 0;
 
-  for (int i = 0; i < SIZE; ++i) {
-    x[i] = xBegin++;
+  for (xCur = xBegin; xCur < 1000; xCur += 0.1) {
     std::string text = ui->label->text().toStdString();
     char *str = &text[0];
-    from_answer(str, &y[i], x[i]);
+    from_answer(str, &yCur, xCur);
+    x.push_back(xCur);
+    y.push_back(yCur);
   }
 
   ui->customPlot->xAxis2->setVisible(true);
@@ -135,4 +142,5 @@ void MainWindow::on_pushButton_graph_clicked() {
 
   ui->customPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom |
                                   QCP::iSelectPlottables);
+  ui->customPlot->replot();
 }
