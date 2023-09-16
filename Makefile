@@ -47,7 +47,7 @@ dist:
 	@mkdir dist
 	@cp -R frontend/ backend/ dvi.md Makefile dist
 	@cd dist && tar cvzf smartCalc_v1.0.tgz *
-	@cd dist && rm -rf frontend/ backend/ test dvi.md Makefile
+	@cd dist && rm -rf *.c *.cpp *.h *.ui calc* dvi.md Makefile
 	@rm -rf calculator
 
 test:

@@ -338,6 +338,15 @@ START_TEST(smartCalc_test_32) {
 }
 END_TEST
 
+START_TEST(smartCalc_test_33) {
+    char* str = "1.+.1";
+    double res = 0;
+    int check = OK;
+    check = from_answer(str, &res, 0);
+    ck_assert_int_eq(check, INCORRECT_INPUT);
+}
+END_TEST
+
 START_TEST(smartCalc_test_credit_1) {
   double loan = 500000;
   int period = 10;
@@ -406,6 +415,7 @@ Suite *s21_SmartCalc_suite() {
   tcase_add_test(tc, smartCalc_test_30);
   tcase_add_test(tc, smartCalc_test_31);
   tcase_add_test(tc, smartCalc_test_32);
+  tcase_add_test(tc, smartCalc_test_33);
   tcase_add_test(tc, smartCalc_test_credit_1);
   tcase_add_test(tc, smartCalc_test_credit_2);
 

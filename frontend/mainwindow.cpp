@@ -117,9 +117,8 @@ void MainWindow::on_pushButton_graph_clicked() {
   QVector<double> x, y;
   double xBegin = -1000;
   double yCur = 0;
-  double xCur = 0;
 
-  for (xCur = xBegin; xCur < 1000; xCur += 0.1) {
+  for (double xCur = xBegin; xCur < 1000; xCur += 0.1) {
     std::string text = ui->label->text().toStdString();
     char *str = &text[0];
     from_answer(str, &yCur, xCur);

@@ -74,9 +74,14 @@ int validateDots(char* str) {
   char* ptr = str;
   while (*ptr != '\0' && status == OK) {
     int dotsCount = 0;
-    if (isdigit(*ptr)) {
+    if (isdigit(*ptr) || (*ptr == '.')) {
       while (isdigit(*ptr) || *ptr == '.') {
-        if (*ptr == '.') dotsCount++;
+        if (*ptr == '.') {
+          dotsCount++;
+          if (!isdigit(*(ptr - 1))) {
+            status = INCORRECT_INPUT;
+          }
+        }
         ptr++;
       }
       ptr--;

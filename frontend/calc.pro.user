@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 7.0.0, 2023-09-12T12:47:40. -->
+<!-- Written by QtCreator 7.0.0, 2023-09-12T18:36:30. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -237,13 +237,9 @@
     <value type="bool" key="Analyzer.Valgrind.Settings.UseGlobalSettings">true</value>
     <valuelist type="QVariantList" key="CustomOutputParsers"/>
     <value type="int" key="PE.EnvironmentAspect.Base">2</value>
-    <valuelist type="QVariantList" key="PE.EnvironmentAspect.Changes">
-     <value type="QString">DYLD_FRAMEWORK_PATH</value>
-     <value type="QString">DYLD_LIBRARY_PATH</value>
-    </valuelist>
-    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">calc2</value>
-    <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">Qt4ProjectManager.Qt4RunConfiguration:/Users/stanniss/s21_Projects/C7_SmartCalc_v1.0-2/src/frontend/calc.pro</value>
-    <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey">/Users/stanniss/s21_Projects/C7_SmartCalc_v1.0-2/src/frontend/calc.pro</value>
+    <valuelist type="QVariantList" key="PE.EnvironmentAspect.Changes"/>
+    <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">Qt4ProjectManager.Qt4RunConfiguration:/Users/stanniss/s21_Projects/C7_SmartCalc_v1.0-3/src/frontend/calc.pro</value>
+    <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey">/Users/stanniss/s21_Projects/C7_SmartCalc_v1.0-3/src/frontend/calc.pro</value>
     <value type="bool" key="RunConfiguration.UseCppDebugger">false</value>
     <value type="bool" key="RunConfiguration.UseCppDebuggerAuto">true</value>
     <value type="bool" key="RunConfiguration.UseLibrarySearchPath">true</value>
