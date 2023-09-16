@@ -19,5 +19,5 @@ cd calc
 
 ## Run application
 ```bash
-make start
+make run_app
 ```
