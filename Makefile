@@ -17,20 +17,20 @@ ifeq ($(OS),Darwin)
 	ADD_LIB = -lcheck -lm
 endif
 
-all: install
+all: clean uninstall install
 
 calc.a: ${OBJ}
 	@ar rcs calc.a $^
 	@ranlib calc.a
 
-install:
+install: clean uninstall
 	@mkdir build/
 	@mkdir calculator/
 	@cd build/ && qmake ../frontend/calc.pro && make
 	@cp -rf build/calc.app calculator
 	@make clean
 
-start: install
+run_app: install
 ifeq ($(OS), Darwin)
 	cd calculator/$(TARGET).app/Contents/MacOS && ./$(TARGET)
 else
