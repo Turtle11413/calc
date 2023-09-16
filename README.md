@@ -1,5 +1,8 @@
 # SmartCalc_v1.0
 
+# calc mode
+![](https://github.com/Turtle11413/calc/tree/main/gif/calc.gif)
+
 ## Open description
 ```bash
 make dvi
