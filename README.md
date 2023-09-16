@@ -1,7 +1,10 @@
 # SmartCalc_v1.0
 
-# calc mode
-![](https://github.com/Turtle11413/calc/main/gif/calc.gif)
+## Calc mode
+![](gif/calc.gif)
+
+## Credit mode
+![](gif/credit.gif)
 
 ## Open description
 ```bash
